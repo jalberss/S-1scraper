@@ -32,27 +32,15 @@ def accessNumberRetriever(text):
             url = "https://www.sec.gov"+ urlarg
             downloadTextFileFromUrl(url)
     accessionnumbersfile.close()
-    #raw_input()
     os.remove("browse.txt")
     os.remove("accessionnumbers.txt")
 
 
-#def fileRetrievalByAccessionNumber(accessionNumber):
-    #arg1 = accessionNumber.split('-')[0].lstrip("0")
-    #arg1 = arg1.lstrip("0")#first 7 digits of the accession number, and strip leading zeros
-    #arg2 = accessionNumber.replace("-","")
-    #arg2 is often the full accessionnumber without dashes
-
-    #example "https://www.sec.gov/Archives/edgar/data/1684506/000168450617000002/0001684506-17-000002.txt""
-    #url = "https://www.sec.gov/Archives/edgar/data/"+arg1+"/"+arg2+"/"+accessionNumber+".txt"
-    #downloadTextFileFromUrl(url)
-    #print url
-
 def downloadTextFileFromUrl(url):
     print url
-    response = urllib2.urlopen(url)
-    print response.read()
-    raw_input()
+    #response = urllib2.urlopen(url)
+    #print response.read()
+    #raw_input()
 
 if __name__ == "__main__":
     main()
