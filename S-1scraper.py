@@ -3,13 +3,15 @@ import requests
 import os
 import urllib2 #used for parsing the text file
 #TODO incorporate dates? Or check if the accessionnumber is already there then ignore
-# Make a directory with all the downloaded files in it.
+# Make a directory with all the downloaded files in it, then go through directory and make csv.
 
 def main():
-    os.makedirs("data")
+    if not (os.path.exists("data")):
+        os.makedirs("data")
     urlRetriever()
-    raw_input()
-    os.rmdir("data")
+    csvMaker()
+
+
 
 def urlRetriever():
     r = requests.get('https://www.sec.gov/cgi-bin/browse-edgar?company=&CIK=&type=S-1&owner=include&count=40&action=getcurrent')
@@ -30,14 +32,13 @@ def accessNumberRetriever(text):
             urlarg = line.split("href=\"")[2].partition("\"")[0]  # strips out .txt expression from the get request
             url = "https://www.sec.gov" + urlarg
             accessionnumber = urlarg.rpartition("/")[2].split(".txt")[0]
-            print accessionnumber
-            accessionnumbersfile.write(accessionnumber)
-            downloadTextFileFromUrl(url,accessionnumber)
+            if not alreadyArchived(accessionnumber):
+                accessionnumbersfile.write(accessionnumber+"\n")
+                downloadTextFileFromUrl(url,accessionnumber)
 
     f.close()
     accessionnumbersfile.close()
     os.remove("browse.txt")
-    os.remove("accessionnumbers.txt")
 
 
 def downloadTextFileFromUrl(url,id):
@@ -45,9 +46,21 @@ def downloadTextFileFromUrl(url,id):
     f = open("data/"+id+".txt","w")
     response = urllib2.urlopen(url)
     f.write(response.read())
-    raw_input()
     #print response.read()
     #raw_input()
+
+
+
+
+def alreadyArchived(num):
+    with open("accessionnumbers.txt","r") as f:
+        for line in f:
+            if num in line:
+                print "already there \n"
+                return True
+
+        return False
+
 
 if __name__ == "__main__":
     main()
