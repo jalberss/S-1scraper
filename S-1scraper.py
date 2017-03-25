@@ -3,7 +3,7 @@ import requests
 import os
 import urllib2 #used for parsing the text file
 import xlsxwriter
-import re
+import time
 #TODO incorporate dates? Or check if the accessionnumber is already there then ignore
 # Make a directory with all the downloaded files in it, then go through directory and make csv.
 
@@ -66,25 +66,23 @@ def alreadyArchived(num):
 def csvMaker():
     """This function will go through the data/ directory, rip out all relevant fields, and put them in a spreadsheet
     Fields that are currently relevant:
-     Company name
-    Address
-    Tel
+     Company name DONE
+    Address DONE
+    Tel DONE
     CEO and any other named officers.
     Advisors - bank, PE sponsor, any others, with details.
-    Date of filing
+    Date of filing DONE
     $ size of intended raise
     Sector
     Size of co    -   pro-forma market cap
     # employees"""
-    workbook = xlsxwriter.Workbook("trial.xlsx")
+    current =  str((time.strftime("%m_%d_%Y")))
+    workbook = xlsxwriter.Workbook(current+".xlsx")
     worksheet = workbook.add_worksheet()
-    worksheet.write(0,0,"Date")
-    worksheet.write(0,1,"Company Conformed Name")
-    worksheet.write(0,2, "Street")
-    worksheet.write(0,3, "City")
-    worksheet.write(0,4, "State")
-    worksheet.write(0,5, "Zip")
-    worksheet.write(0,6, "Telephone")
+    fields = ["Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"]
+    for i in range(0,8):
+        worksheet.write(0,i,fields[i])
+
     directoryCrawler(worksheet)
     workbook.close()
 
@@ -104,13 +102,20 @@ def directoryCrawler(book):
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
     retlist = []
+    banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     businessaddress = False
+    sectorBool = False
     for line in file:
         if "COMPANY CONFORMED NAME" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
+        elif "STANDARD INDUSTRIAL CLASSIFICATION" in line:
+            retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
+            sectorBool = True
         elif "BUSINESS ADDRESS" in line:
             businessaddress = True
         elif "STREET 1" in line and businessaddress:
+            if not sectorBool:
+                retlist.append("") #some forms won't have a sector, so this will clean that up, so as not to mess with spreadsheet
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
         elif "CITY" in line and businessaddress:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
@@ -137,8 +142,9 @@ def dataParser(file):
                                   telephoneNumber[6:9] + "-" + telephoneNumber[9:13]
             retlist.append(telephoneNumber)
         elif "MAIL ADDRESS" in line:
-            #businessaddress = False
-            break
+            businessaddress = False
+            continue
+
         elif "FILED AS OF DATE" in line:
             date = (line.split(":")[1]).lstrip("\t").rstrip("\n")
             date = date[4:6] + "/" + date[6:8] + "/" + date[0:4]
