@@ -16,7 +16,7 @@ def main():
 
 
 def urlRetriever():
-    r = requests.get('https://www.sec.gov/cgi-bin/browse-edgar?company=&CIK=&type=S-1&owner=include&count=40&action=getcurrent')
+    r = requests.get('https://www.sec.gov/cgi-bin/browse-edgar?company=&CIK=&type=S-1&owner=include&count=10&action=getcurrent')
     accessNumberRetriever(r.text)
 
 def accessNumberRetriever(text):
@@ -79,8 +79,8 @@ def csvMaker():
     current =  str((time.strftime("%m_%d_%Y")))
     workbook = xlsxwriter.Workbook(current+".xlsx")
     worksheet = workbook.add_worksheet()
-    fields = ["Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"]
-    for i in range(0,8):
+    fields = ["Type","Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"]
+    for i in range(0,9):
         worksheet.write(0,i,fields[i])
 
     directoryCrawler(worksheet)
@@ -92,11 +92,14 @@ def directoryCrawler(book):
     for file in os.listdir(os.getcwd()+"/data"):
         with open(os.getcwd()+"/data/"+file,"r") as f:
             datalist = dataParser(f)
-            for i in datalist:
-                book.write(row,col,i)
-                col = col + 1
-            row = row + 1
-            col = 0
+            if datalist[0] == "S-1/A":
+                print datalist[2]
+            else:
+                for i in datalist:
+                    book.write(row,col,i)
+                    col = col + 1
+                row = row + 1
+                col = 0
 
 
 def dataParser(file):
@@ -106,7 +109,9 @@ def dataParser(file):
     businessaddress = False
     sectorBool = False
     for line in file:
-        if "COMPANY CONFORMED NAME" in line:
+        if "SUBMISSION TYPE" in line:
+            retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
+        elif "COMPANY CONFORMED NAME" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
         elif "STANDARD INDUSTRIAL CLASSIFICATION" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
@@ -144,7 +149,6 @@ def dataParser(file):
         elif "MAIL ADDRESS" in line:
             businessaddress = False
             continue
-
         elif "FILED AS OF DATE" in line:
             date = (line.split(":")[1]).lstrip("\t").rstrip("\n")
             date = date[4:6] + "/" + date[6:8] + "/" + date[0:4]
