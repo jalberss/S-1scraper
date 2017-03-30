@@ -7,6 +7,7 @@ import time
 #TODO incorporate dates? Or check if the accessionnumber is already there then ignore
 # Make a directory with all the downloaded files in it, then go through directory and make csv.
 
+
 def main():
     if not (os.path.exists("data")):
         os.makedirs("data")
@@ -16,7 +17,7 @@ def main():
 
 
 def urlRetriever():
-    r = requests.get('https://www.sec.gov/cgi-bin/browse-edgar?company=&CIK=&type=S-1&owner=include&count=10&action=getcurrent')
+    r = requests.get('https://www.sec.gov/cgi-bin/browse-edgar?company=&CIK=&type=S-1&owner=include&count=100&action=getcurrent')
     accessNumberRetriever(r.text)
 
 def accessNumberRetriever(text):
@@ -48,6 +49,7 @@ def downloadTextFileFromUrl(url,id):
     f = open("data/"+id+".txt","w")
     response = urllib2.urlopen(url)
     f.write(response.read())
+    f.close()
     #print response.read()
     #raw_input()
 
@@ -79,8 +81,9 @@ def csvMaker():
     current =  str((time.strftime("%m_%d_%Y")))
     workbook = xlsxwriter.Workbook(current+".xlsx")
     worksheet = workbook.add_worksheet()
-    fields = ["Type","Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"]
-    for i in range(0,9):
+    fields = ["Type","Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"
+        ,"Link","Offering Amount"]
+    for i in range(0,len(fields)):
         worksheet.write(0,i,fields[i])
 
     directoryCrawler(worksheet)
@@ -92,7 +95,7 @@ def directoryCrawler(book):
     for file in os.listdir(os.getcwd()+"/data"):
         with open(os.getcwd()+"/data/"+file,"r") as f:
             datalist = dataParser(f)
-            if datalist[0] == "S-1/A":
+            if datalist[0] != "S-1" or hasNumbers(datalist[6]): #This leaves out S-1/A and international companies
                 print datalist[2]
             else:
                 for i in datalist:
@@ -101,6 +104,8 @@ def directoryCrawler(book):
                 row = row + 1
                 col = 0
 
+def hasNumbers(pair):
+    return any(i.isdigit() for i in pair)
 
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
@@ -111,6 +116,9 @@ def dataParser(file):
     for line in file:
         if "SUBMISSION TYPE" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
+        #elif "chief executive officer" in line.lower():
+            #print line
+            #raw_input()
         elif "COMPANY CONFORMED NAME" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
         elif "STANDARD INDUSTRIAL CLASSIFICATION" in line:
