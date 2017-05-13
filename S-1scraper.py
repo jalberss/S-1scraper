@@ -7,6 +7,7 @@ import time
 #TODO incorporate dates? Or check if the accessionnumber is already there then ignore
 # Make a directory with all the downloaded files in it, then go through directory and make csv.
 
+url_lookup = {}
 
 def main():
     if not (os.path.exists("data")):
@@ -35,7 +36,9 @@ def accessNumberRetriever(text):
             urlarg = line.split("href=\"")[2].partition("\"")[0]  # strips out .txt expression from the get request
             url = "https://www.sec.gov" + urlarg
             accessionnumber = urlarg.rpartition("/")[2].split(".txt")[0]
+            url_lookup[accessionnumber] = url
             if not alreadyArchived(accessionnumber):
+
                 accessionnumbersfile.write(accessionnumber+"\n")
                 downloadTextFileFromUrl(url,accessionnumber)
 
@@ -78,11 +81,11 @@ def csvMaker():
     Sector
     Size of co    -   pro-forma market cap
     # employees"""
-    current =  str((time.strftime("%m_%d_%Y")))
+    current = str((time.strftime("%m_%d_%Y")))
     workbook = xlsxwriter.Workbook(current+".xlsx")
     worksheet = workbook.add_worksheet()
     fields = ["Type","Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"
-        ,"Link","Offering Amount"]
+        ,"Link","Offering Amount", "Chief Executive Officer"]
     for i in range(0,len(fields)):
         worksheet.write(0,i,fields[i])
 
@@ -110,6 +113,10 @@ def hasNumbers(pair):
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
     retlist = []
+    print(file.name.split("/")[6].strip(".txt"))
+    key = file.name.split("/")[6].strip(".txt")
+    print(url_lookup)
+    raw_input()
     banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     businessaddress = False
     sectorBool = False
