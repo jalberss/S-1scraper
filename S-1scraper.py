@@ -36,7 +36,7 @@ def accessNumberRetriever(text):
             urlarg = line.split("href=\"")[2].partition("\"")[0]  # strips out .txt expression from the get request
             url = "https://www.sec.gov" + urlarg
             accessionnumber = urlarg.rpartition("/")[2].split(".txt")[0]
-            url_lookup[accessionnumber] = url
+            url_lookup[accessionnumber] = url.split(".txt")[0]+("-index.htm")
             if not alreadyArchived(accessionnumber):
 
                 accessionnumbersfile.write(accessionnumber+"\n")
@@ -113,10 +113,7 @@ def hasNumbers(pair):
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
     retlist = []
-    print(file.name.split("/")[6].strip(".txt"))
     key = file.name.split("/")[6].strip(".txt")
-    print(url_lookup)
-    raw_input()
     banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     businessaddress = False
     sectorBool = False
@@ -170,6 +167,7 @@ def dataParser(file):
             retlist.append(date)
         else:
             continue
+    retlist.append(url_lookup[key])
     return retlist
 
 
