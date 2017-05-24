@@ -167,7 +167,11 @@ def dataParser(file):
             retlist.append(date)
         else:
             continue
-    retlist.append(url_lookup[key])
+    try:
+        url = url_lookup[key]
+    except KeyError, e:
+        return retlist
+    retlist.append(url)
     return retlist
 
 
