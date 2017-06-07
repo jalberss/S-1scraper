@@ -38,7 +38,6 @@ def accessNumberRetriever(text):
             accessionnumber = urlarg.rpartition("/")[2].split(".txt")[0]
             url_lookup[accessionnumber] = url.split(".txt")[0]+("-index.htm")
             if not alreadyArchived(accessionnumber):
-
                 accessionnumbersfile.write(accessionnumber+"\n")
                 downloadTextFileFromUrl(url,accessionnumber)
 
