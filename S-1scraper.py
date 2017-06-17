@@ -83,8 +83,8 @@ def csvMaker():
     current = str((time.strftime("%m_%d_%Y")))
     workbook = xlsxwriter.Workbook(current+".xlsx")
     worksheet = workbook.add_worksheet()
-    fields = ["Type","Date of Filing", "Company Conformed Name","Sector", "Street", "City", "State", "Zip", "Telephone"
-        ,"Link","Offering Amount", "Chief Executive Officer"]
+    fields = ["Type","Date of Filing", "Company Conformed Name", "Sector", "Street", "City", "State", "Zip", "Telephone"
+        ,"Link","Offering Amount", "Chief Executive Officer", "Underwriters"]
     for i in range(0,len(fields)):
         worksheet.write(0,i,fields[i])
 
@@ -99,6 +99,7 @@ def directoryCrawler(book):
             datalist = dataParser(f)
             if datalist[0] != "S-1" or hasNumbers(datalist[6]): #This leaves out S-1/A and international companies
                 print datalist[2]
+                #continue
             else:
                 for i in datalist:
                     book.write(row,col,i)
@@ -114,14 +115,16 @@ def dataParser(file):
     retlist = []
     key = file.name.split("/")[6].strip(".txt")
     banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
+    bankstring = ""
     businessaddress = False
     sectorBool = False
     for line in file:
         if "SUBMISSION TYPE" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
-        #elif "chief executive officer" in line.lower():
-            #print line
-            #raw_input()
+        elif any(b in line for b in banks):
+            print "BANKS"
+        elif "UNDERWRITERS" in line:
+            bankstring = line
         elif "COMPANY CONFORMED NAME" in line:
             retlist.append((line.split(":")[1]).lstrip("\t").rstrip("\n"))
         elif "STANDARD INDUSTRIAL CLASSIFICATION" in line:
@@ -171,6 +174,7 @@ def dataParser(file):
     except KeyError, e:
         return retlist
     retlist.append(url)
+    retlist.append(bankstring)
     return retlist
 
 
