@@ -10,8 +10,8 @@ import time
 url_lookup = {}
 
 def main():
-    if not (os.path.exists("data")):
-        os.makedirs("data")
+    current = str((time.strftime("%m_%d_%Y")))
+    os.makedirs("data"+"_"+current)
     urlRetriever()
     csvMaker()
 
@@ -48,7 +48,9 @@ def accessNumberRetriever(text):
 
 def downloadTextFileFromUrl(url,id):
     #id will act as file name for the dir
-    f = open("data/"+id+".txt","w")
+    current = str((time.strftime("%m_%d_%Y")))
+    data_folder = "data"+"_"+current+"/"
+    f = open(data_folder+id+".txt","w")
     response = urllib2.urlopen(url)
     f.write(response.read())
     f.close()
@@ -94,8 +96,10 @@ def csvMaker():
 def directoryCrawler(book):
     row = 1
     col = 0
-    for file in os.listdir(os.getcwd()+"/data"):
-        with open(os.getcwd()+"/data/"+file,"r") as f:
+    current_time = str((time.strftime("%m_%d_%Y")))
+    data_folder = "data"+"_"+current_time
+    for file in os.listdir(os.getcwd()+"/"+data_folder):
+        with open(os.getcwd()+"/"+data_folder+"/"+file,"r") as f:
             datalist = dataParser(f)
             if datalist[0] != "S-1" or hasNumbers(datalist[6]): #This leaves out S-1/A and international companies
                 print datalist[2]
