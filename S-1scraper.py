@@ -5,7 +5,8 @@ import urllib2 #used for parsing the text file
 import xlsxwriter
 import time
 from bs4 import BeautifulSoup
-import pandas as pd
+import unittest
+import lxml
 # Make a directory with all the downloaded files in it, then go through directory and make csv.
 
 url_lookup = {}
@@ -188,20 +189,32 @@ def dataParser(file):
 
 def tableParser(soup):
     bankstring = ''
-    banks = ["credit suisse", "deutsche bank", "goldman sachs", "j.p. morgan", "morgan stanley"]
+    banks = ["credit suisse", "deutsche bank", "goldman sachs", "j.p. morgan", "morgan stanley", "stifel"]
     table = soup.find(class_ = 'dataframe')
     for row in table.find_all('tr')[1:]:
         col = row.find_all('td')
         for i in col:
             for b in banks:
-                if i.string().strip() == b:
+                if i.string().strip().lower() == b:
                     bankstring = bankstring + i.string().strip()
 
     print bankstring
 
 
+class TableParserTestCase(unittest.TestCase):
+
+    def test_test(self):
+        self.assertTrue(True)
+
+    def test_TableParser(self):
+        f = open("/Users/JAlbers/Projects/S-1scraper/TestData/0001193125-17-216619.txt")
+        soup = BeautifulSoup(f,'lxml')
+        tableParser(soup)
+
+
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
+    #main()
 
