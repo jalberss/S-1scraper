@@ -123,7 +123,6 @@ def dataParser(file):
     #soup = BeautifulSoup(fileCopy,"lxml")
     #tableParser(soup)
     key = file.name.split("/")[6].strip(".txt")
-    banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     bankstring = ""
     businessaddress = False
     sectorBool = False
@@ -189,7 +188,7 @@ def dataParser(file):
 
 def tableParser(soup):
     bankstring = ''
-    banks = ["oppenheimer & co.","rbc capital markets","bofa merrill lynch","allen & company llc","credit suisse", "deutsche bank", "goldman sachs & co llc", "j.p. morgan", "morgan stanley", "stifel", "oppenheimer"]
+    banks = ["aegis capital corp.", "oppenheimer & co.","rbc capital markets","bofa merrill lynch","allen & company llc","credit suisse", "deutsche bank", "goldman sachs & co llc", "j.p. morgan", "morgan stanley", "stifel", "oppenheimer"]
     for row in soup.find_all('tr')[1:]:
         for col in row.find_all('td'):
             if col.string != None and col.string.strip().lower() in banks:
@@ -205,9 +204,12 @@ class TableParserTestCase(unittest.TestCase):
     def test_TableParser(self):
         f = requests.get("https://www.sec.gov/Archives/edgar/data/1382821/000119312517219877/d325499ds1.htm")
         soup = BeautifulSoup(f.text,'lxml')
-        print tableParser(soup)
         self.assertTrue(tableParser(soup) == "allen & company llc, bofa merrill lynch, rbc capital markets, oppenheimer & co., stifel")
 
+    def test_TableParse_1(self):
+        f = requests.get("https://www.sec.gov/Archives/edgar/data/1460702/000149315217007461/forms-1.htm")
+        soup = BeautifulSoup(f.text,'lxml')
+        self.assertTrue(tableParser(soup) == "aegis capital corp.")
 
 
 
