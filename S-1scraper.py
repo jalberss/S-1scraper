@@ -4,7 +4,8 @@ import os
 import urllib2 #used for parsing the text file
 import xlsxwriter
 import time
-#TODO incorporate dates? Or check if the accessionnumber is already there then ignore
+from bs4 import BeautifulSoup
+import pandas as pd
 # Make a directory with all the downloaded files in it, then go through directory and make csv.
 
 url_lookup = {}
@@ -117,6 +118,9 @@ def hasNumbers(pair):
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
     retlist = []
+    fileCopy = file
+    soup = BeautifulSoup(fileCopy,"lxml")
+    tableParser(soup)
     key = file.name.split("/")[6].strip(".txt")
     banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     bankstring = ""
@@ -180,6 +184,22 @@ def dataParser(file):
     retlist.append(url)
     retlist.append(bankstring)
     return retlist
+
+
+def tableParser(soup):
+    bankstring = ''
+    banks = ["credit suisse", "deutsche bank", "goldman sachs", "j.p. morgan", "morgan stanley"]
+    table = soup.find(class_ = 'dataframe')
+    for row in table.find_all('tr')[1:]:
+        col = row.find_all('td')
+        for i in col:
+            for b in banks:
+                if i.string().strip() == b:
+                    bankstring = bankstring + i.string().strip()
+
+    print bankstring
+
+
 
 
 if __name__ == "__main__":
