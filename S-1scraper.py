@@ -119,9 +119,9 @@ def hasNumbers(pair):
 def dataParser(file):
     """This function will return an array of information it gathers from the text file"""
     retlist = []
-    fileCopy = file
-    soup = BeautifulSoup(fileCopy,"lxml")
-    tableParser(soup)
+    #fileCopy = file
+    #soup = BeautifulSoup(fileCopy,"lxml")
+    #tableParser(soup)
     key = file.name.split("/")[6].strip(".txt")
     banks = ["credit suisse","deutsche bank","goldman sachs","j.p. morgan","morgan stanley"]
     bankstring = ""
@@ -189,17 +189,13 @@ def dataParser(file):
 
 def tableParser(soup):
     bankstring = ''
-    banks = ["credit suisse", "deutsche bank", "goldman sachs", "j.p. morgan", "morgan stanley", "stifel"]
-    table = soup.find(class_ = 'dataframe')
-    for row in table.find_all('tr')[1:]:
-        col = row.find_all('td')
-        for i in col:
-            for b in banks:
-                if i.string().strip().lower() == b:
-                    bankstring = bankstring + i.string().strip()
+    banks = ["oppenheimer & co.","rbc capital markets","bofa merrill lynch","allen & company llc","credit suisse", "deutsche bank", "goldman sachs & co llc", "j.p. morgan", "morgan stanley", "stifel", "oppenheimer"]
+    for row in soup.find_all('tr')[1:]:
+        for col in row.find_all('td'):
+            if col.string != None and col.string.strip().lower() in banks:
+                bankstring = bankstring + col.string.strip().lower() + ", "
 
-    print bankstring
-
+    return bankstring.rstrip(", ")
 
 class TableParserTestCase(unittest.TestCase):
 
@@ -207,9 +203,10 @@ class TableParserTestCase(unittest.TestCase):
         self.assertTrue(True)
 
     def test_TableParser(self):
-        f = open("/Users/JAlbers/Projects/S-1scraper/TestData/0001193125-17-216619.txt")
-        soup = BeautifulSoup(f,'lxml')
-        tableParser(soup)
+        f = requests.get("https://www.sec.gov/Archives/edgar/data/1382821/000119312517219877/d325499ds1.htm")
+        soup = BeautifulSoup(f.text,'lxml')
+        print tableParser(soup)
+        self.assertTrue(tableParser(soup) == "allen & company llc, bofa merrill lynch, rbc capital markets, oppenheimer & co., stifel")
 
 
 
